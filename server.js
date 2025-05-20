@@ -1,54 +1,59 @@
-const express = require('express');
-const cors = require('cors');
-const RSSParser = require('rss-parser');
-const parser = new RSSParser();
+const express = require("express");
+const cors = require("cors");
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+app.use(cors());
 
-const feeds = {
+const sampleNews = {
   Health: [
-    'https://www.positive.news/feed/',
-    'https://www.goodnewsnetwork.org/category/health/feed/'
+    {
+      title: "New Breakthrough in Cancer Research Offers Hope",
+      link: "https://example.com/cancer-breakthrough",
+      source: "Health Daily"
+    },
+    {
+      title: "Mental Health Programs Expand Across Schools",
+      link: "https://example.com/mental-health-schools",
+      source: "Positive Health"
+    }
   ],
   Environment: [
-    'https://www.goodnewsnetwork.org/category/news/environment/feed/'
+    {
+      title: "Coral Reefs Show Unexpected Recovery After Conservation Efforts",
+      link: "https://example.com/coral-reef-recovery",
+      source: "Positive News"
+    },
+    {
+      title: "City Plants One Million Trees in 5 Years to Boost Air Quality",
+      link: "https://example.com/million-trees-project",
+      source: "Green Times"
+    }
   ],
   Community: [
-    'https://www.inspiremore.com/feed/',
-    'https://www.goodnewsnetwork.org/category/news/usa/feed/'
+    {
+      title: "Local Bakery Donates Bread to Homeless Every Morning",
+      link: "https://example.com/local-bakery-donates",
+      source: "Kindness News"
+    },
+    {
+      title: "Volunteers Build Homes for Families in Need",
+      link: "https://example.com/volunteers-build-homes",
+      source: "Community Weekly"
+    }
   ]
 };
 
-app.use(cors());
-
-app.get('/news/:category', async (req, res) => {
+app.get("/news/:category", (req, res) => {
   const category = req.params.category;
-  const urls = feeds[category];
-
-  if (!urls) {
-    return res.status(404).json({ error: 'Category not found' });
-  }
-
-  try {
-    const results = [];
-    for (const url of urls) {
-      const feed = await parser.parseURL(url);
-      feed.items.slice(0, 5).forEach(item => {
-        results.push({
-          title: item.title,
-          link: item.link,
-          source: new URL(item.link).hostname.replace('www.', '')
-        });
-      });
-    }
-    res.json(results);
-  } catch (error) {
-    console.error('RSS fetch error:', error);
-    res.status(500).json({ error: 'Failed to fetch news' });
+  const data = sampleNews[category];
+  if (data) {
+    res.json(data);
+  } else {
+    res.status(404).json({ error: "Category not found" });
   }
 });
 
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Uplifting news server running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
